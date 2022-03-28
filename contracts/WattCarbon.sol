@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract WattCarbon is ERC20, ERC20Burnable, AccessControl {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    mapping (address => uint256) public burnAmounts;
 
     constructor() ERC20("WattCarbon", "WC") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -15,6 +16,15 @@ contract WattCarbon is ERC20, ERC20Burnable, AccessControl {
 
     function mint(address to, uint256 amount) public onlyRole(MINTER_ROLE) {
         _mint(to, amount);
+    }
+
+    function burnToken(uint256 amount) public {
+        _burn(msg.sender, amount);
+        burnAmounts[msg.sender] += amount;
+    }
+
+    function getBurnAmount(address check) public view returns(uint256) {
+        return burnAmounts[check];
     }
 
     function addMinter(address _member) public onlyRole(DEFAULT_ADMIN_ROLE) {
