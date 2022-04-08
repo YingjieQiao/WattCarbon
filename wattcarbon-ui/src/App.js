@@ -1,5 +1,3 @@
-import Button from "@mui/material/Button";
-
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import ReactTooltip from "react-tooltip";
@@ -208,16 +206,6 @@ function App() {
             </div>
           )}
         </div>
-
-        {/* <div className="flex justify-center text-gray-600 ">
-          <textarea onChange={(e) => setAmtToBurn(e.target.value)}></textarea>
-        </div>
-
-        <div className="flex justify-center mt-10 font-sans text-lg">
-          {currentAccount && !chainErr
-            ? burnTokenButtonAndHistoryButton()
-            : connectWalletButton()}
-        </div> */}
       </div>
     </div>
   );
