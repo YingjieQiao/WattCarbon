@@ -1,10 +1,9 @@
-import './App.css';
+import Button from '@mui/material/Button';
+
 import { useState, useEffect } from 'react'
 import { ethers } from 'ethers'
 
 import abi from "./contracts/abi.json"
-// import web3 from './web3';
-// import wcContract from './wcContract';
 const contractAddress = "0xAbD5A887C46f4d42CD5412f99C0AeDbC8cd16643"
 
 function App() {
@@ -23,10 +22,7 @@ function App() {
       console.log("Wallet exists! We're ready to go!")
     }
 
-
-    // Set Metamask as the RPC provider - requests issued to the miners using Metamask wallet
     const provider = new ethers.providers.Web3Provider(ethereum)
-    // Access signer to issue requests - user needs to sign transactions using their private key
     const signer = provider.getSigner()
     const { chainId } = await provider.getNetwork()
 
@@ -104,17 +100,17 @@ function App() {
 
   const connectWalletButton = () => {
     return (
-      <button onClick={connectWalletHandler} className='cta-button connect-wallet-button'>
+      <Button onClick={connectWalletHandler} className='cta-button connect-wallet-button'>
         Connect Wallet
-      </button>
+      </Button>
     )
   }
 
   const burnTokenButton = () => {
     return (
-      <button onClick={burnTokenHandler} className='cta-button mint-nft-button'>
+      <Button onClick={burnTokenHandler} className='cta-button mint-nft-button'>
         Burn Token
-      </button>
+      </Button>
     )
   }
 
@@ -142,14 +138,18 @@ function App() {
 
   const burnTokenButtonAndHistoryButton = () => {
     return (
-      <div>
-        <button onClick={burnTokenHandler} className='cta-button mint-nft-button'>
-        Burn Token
-        </button>
+      <div className="flex justify-center mt-10 font-sans text-lg">
+        <div className="m-10">
+          <Button variant="contained" onClick={burnTokenHandler} >
+            Burn Token
+          </Button>
+        </div>
 
-        <button onClick={historyHandler} className='cta-button history-button'>
-          Burn History
-        </button>
+        <div className="m-10">
+          <Button variant="contained" onClick={historyHandler}>
+            Burn History
+          </Button>
+        </div>
       </div>
     )
   }
@@ -161,12 +161,26 @@ function App() {
   console.log(amtToBurn)
 
   return (
-    <div className='main-app'>
-      <h1>WattCarbon</h1>
-      <h2>{ balance }</h2>
-      <textarea onChange={ e => setAmtToBurn(e.target.value)}></textarea>
+    <div className="flex flex-wrap content-center justify-center min-h-screen bg-green-200 font-major ">
       <div>
-        {(currentAccount && !chainErr) ? burnTokenButtonAndHistoryButton() : connectWalletButton()}
+        
+        <div className="flex justify-center mt-6 text-gray-600 text-8xl sm:text-9xl">
+          <h1 >
+            WattCarbon
+          </h1>
+        </div>
+
+        <div className="flex justify-center mt-6 text-gray-600 ">
+          <p>Balance: { balance }</p>
+        </div>
+
+        <div className="flex justify-center text-gray-600 ">
+          <textarea onChange={ e => setAmtToBurn(e.target.value)}></textarea>
+        </div>
+
+        <div className="flex justify-center mt-10 font-sans text-lg">
+          {(currentAccount && !chainErr) ? burnTokenButtonAndHistoryButton() : connectWalletButton()}
+        </div>
       </div>
     </div>
   )
