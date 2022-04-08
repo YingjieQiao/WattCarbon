@@ -1,4 +1,5 @@
-import Button from '@mui/material/Button';
+import { Button, TextField, Paper } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 
 import { useState, useEffect } from 'react'
 import { ethers } from 'ethers'
@@ -6,11 +7,28 @@ import { ethers } from 'ethers'
 import abi from "./contracts/abi.json"
 const contractAddress = "0xAbD5A887C46f4d42CD5412f99C0AeDbC8cd16643"
 
-function App() {
+function App(props) {
   const [currentAccount, setCurrentAccount] = useState(null)
   const [balance, setBalance] = useState(null)
   const [amtToBurn, setAmtToBurn] = useState(0)
   const [chainErr, setChainErr] = useState(false)
+
+  async function checkAccountAndBalance(accounts, signer) {
+    // Pick first account and set as current account
+    if (accounts.length !== 0) {
+      const account = accounts[0]
+      console.log("Found an authorized account: ", account)
+      setCurrentAccount(account)
+
+      // Initiate an ethers Contract instance using the deployed contract's address, contract ABI and the signer
+      const wcContract = new ethers.Contract(contractAddress, abi, signer)
+      let balance = await wcContract.balanceOf(account)
+      balance = ethers.utils.formatEther(balance)
+      setBalance(balance)
+    } else {
+      console.log("No authorized account found.")
+    }
+  }
 
   const checkWalletIsConnected = async () => { 
     const { ethereum } = window
@@ -32,24 +50,7 @@ function App() {
       // Request Metamask for accounts that are connected
       const accounts = await ethereum.request({ method: 'eth_accounts' })
 
-      // Pick first account and set as current account
-      if (accounts.length !== 0) {
-        const account = accounts[0]
-        console.log("Found an authorized account: ", account)
-        setCurrentAccount(account)
-
-        // const provider = new ethers.providers.Web3Provider(ethereum)
-        // let balance = await provider.getBalance(contractAddress)
-        // balance = ethers.utils.formatEther(balance)
-
-        // Initiate an ethers Contract instance using the deployed contract's address, contract ABI and the signer
-        const wcContract = new ethers.Contract(contractAddress, abi, signer)
-        let balance = await wcContract.balanceOf(account)
-        balance = ethers.utils.formatEther(balance)
-        setBalance(balance)
-      } else {
-        console.log("No authorized account found.")
-      }
+      await checkAccountAndBalance(accounts, signer)
     } else {
       alert("Don't bobo. Use Ropsten.")
       setChainErr(true)
@@ -100,16 +101,8 @@ function App() {
 
   const connectWalletButton = () => {
     return (
-      <Button onClick={connectWalletHandler} className='cta-button connect-wallet-button'>
+      <Button onClick={connectWalletHandler}>
         Connect Wallet
-      </Button>
-    )
-  }
-
-  const burnTokenButton = () => {
-    return (
-      <Button onClick={burnTokenHandler} className='cta-button mint-nft-button'>
-        Burn Token
       </Button>
     )
   }
@@ -129,27 +122,82 @@ function App() {
 
         console.log("Getting burn token...")
         let burnedToken = await wcContract.getBurnAmount(currentAccount)
-        console.log(ethers.utils.formatEther(burnedToken))
+
+        const accounts = await ethereum.request({ method: 'eth_accounts' })
+        await checkAccountAndBalance(accounts, signer)
+
+        alert(`Burned ${ethers.utils.formatEther(burnedToken)} tokens`)
+        console.log(balance)
       }
     } catch (err) {
       console.log(err)
     }
   }
 
-  const burnTokenButtonAndHistoryButton = () => {
-    return (
-      <div className="flex justify-center mt-10 font-sans text-lg">
-        <div className="m-10">
-          <Button variant="contained" onClick={burnTokenHandler} >
-            Burn Token
-          </Button>
-        </div>
+  // UI
+  const useStyles = makeStyles(theme => ({
+    button: {
+      margin: theme.spacing(1)
+    },
+    leftIcon: {
+      marginRight: theme.spacing(1)
+    },
+    rightIcon: {
+      marginLeft: theme.spacing(1)
+    },
+    iconSmall: {
+      fontSize: 20
+    },
+    root: {
+      padding: theme.spacing(3, 2)
+    },
+    container: {
+      display: "flex",
+      flexWrap: "wrap"
+    },
+    textField: {
+      marginLeft: theme.spacing(1),
+      marginRight: theme.spacing(1),
+      width: 400
+    }
+  }));
 
-        <div className="m-10">
+  const classes = useStyles();
+
+  const burnTokenButton = () => {
+    return (
+      <div className="flex justify-center">
+          <Paper className={classes.root}>
+
+              <TextField
+                label="Amount to burn"
+                id="margin-normal"
+                name="name"
+                className={classes.textField}
+                helperText="Enter the amount to burn"
+                onChange={e => setAmtToBurn(e.target.value)}
+              />
+
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                className={classes.button}
+                onClick={burnTokenHandler}
+              >
+                Burn Token
+              </Button>
+          </Paper>
+      </div>
+    )
+  }
+
+  const historyButton = () => {
+    return (
+      <div className={classes.button}>
           <Button variant="contained" onClick={historyHandler}>
-            Burn History
+            Show Burn History
           </Button>
-        </div>
       </div>
     )
   }
@@ -171,15 +219,15 @@ function App() {
         </div>
 
         <div className="flex justify-center mt-6 text-gray-600 ">
-          <p>Balance: { balance }</p>
-        </div>
-
-        <div className="flex justify-center text-gray-600 ">
-          <textarea onChange={ e => setAmtToBurn(e.target.value)}></textarea>
+          <p>Current Balance: { balance }</p>
         </div>
 
         <div className="flex justify-center mt-10 font-sans text-lg">
-          {(currentAccount && !chainErr) ? burnTokenButtonAndHistoryButton() : connectWalletButton()}
+          {(currentAccount && !chainErr) ? burnTokenButton() : connectWalletButton()}
+        </div>
+
+        <div className="flex justify-center mt-10 font-sans text-lg">
+          {(currentAccount && !chainErr) ? historyButton() : connectWalletButton()}
         </div>
       </div>
     </div>
