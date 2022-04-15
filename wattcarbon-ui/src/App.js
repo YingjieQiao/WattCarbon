@@ -46,8 +46,7 @@ function App() {
     }
 
     console.log("finished transaction: ", txHash);
-    setCurrPendingTxNum(currPendingTxNum - 1);
-    
+    setCurrPendingTxNum(currPendingTxNum => currPendingTxNum - 1);
     const accounts = await ethereum.request({ method: "eth_accounts" });
     const signer = provider.getSigner();
     await updateBalanceAndBurnedAmount(accounts, signer);
@@ -118,7 +117,7 @@ function App() {
         let burnedToken = await wcContract.burnToken(amt.toString(10));
         console.log(burnedToken);
 
-        setCurrPendingTxNum(currPendingTxNum + 1);
+        setCurrPendingTxNum(currPendingTxNum => currPendingTxNum + 1);
         await monitorTx(burnedToken["hash"]);
       }
     } catch (err) {
@@ -156,20 +155,6 @@ function App() {
   useEffect(() => {
     console.log("current pending tx num: ", currPendingTxNum);
   }, [currPendingTxNum])
-  // useEffect(() => {
-  //   const onMouseMove = e => {
-  //       const { ethereum } = window;
-  //       const provider = new ethers.providers.Web3Provider(ethereum);
-
-  //       provider.on("pending", (tx) => {
-  //         provider.getTransaction(tx).then(function (transaction) {
-  //           // console.log(transaction);
-  //           console.log("found new pending transaction");
-  //         });
-  //       })
-  //     }
-  //     window.addEventListener('mousemove', onMouseMove);
-  // })
 
   useEffect(() => {
     ReactTooltip.rebuild();
@@ -213,7 +198,7 @@ function App() {
           ) : (
             <div class="bg-white p-2 rounded-full flex flex-row space-x-2 drop-shadow">
               <div class="bg-blue-400 rounded-full w-8 h-8 self-center" />
-              <span class="font-thin">No pending transactions</span>
+              <span>No pending transactions</span>
             </div>
           )}
         </div>
