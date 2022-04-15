@@ -65,6 +65,7 @@ function App() {
     const provider = new ethers.providers.Web3Provider(ethereum);
     const signer = provider.getSigner();
     const { chainId } = await provider.getNetwork();
+    const accounts = await ethereum.request({ method: "eth_accounts" });
 
     console.log(chainId);
 
@@ -73,6 +74,9 @@ function App() {
       const accounts = await ethereum.request({ method: "eth_accounts" });
 
       await updateBalanceAndBurnedAmount(accounts, signer);
+    } else if (accounts === null || accounts.length === 0) {
+      console.log("check length: ", accounts.length);
+      setCurrentAccount(null);
     } else {
       alert("Please use Ropsten Network.");
       setChainErr(true);
